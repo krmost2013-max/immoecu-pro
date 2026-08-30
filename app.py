@@ -703,18 +703,18 @@ def process_ecu_file(file_bytes, file_size, ecu_key, operation, original_filenam
 
     return server_code, extracted_pin, is_error_css, filename_out, file_bytes, should_download
 # =========================================================================
-# 🔒 بوابات حماية السحابة ونظام المشتركين المعتمد (مصلح التوجيه التلقائي)
+# 🔒 بوابات حماية السحابة ونظام المشتركين (المدمج بحظر التخمين عند 15 محاولة)
 # =========================================================================
 from flask import session, redirect
 
 # 👥 قاعدة بيانات الحسابات المصرح لها بالولوج (يمكنك إضافة حسابات عملائك هنا)
 USERS_DATABASE = {
     "abdu": {"password": "20130310d", "status": "active"},     # حسابك الشخصي كمطور
-    "user1": {"password": "1234", "status": "active"}, # حساب عميل صاحب ورشة
-    "user2": {"password": "12345", "status": "expired"} # حساب منتهي الصلاحية مقفل
+    "user1": {"password": "Demo account", "status": "active"}, # حساب عميل صاحب ورشة
+    "user2": {"password": "Expired account", "status": "expired"} # حساب منتهي الصلاحية مقفل
 }
 
-# قالب صفحة تسجيل الدخول المستقبلية الفخمة أونلاين
+# قالب صفحة تسجيل الدخول المستقبلية الفخمة المحدث بنظام الحظر والتأمين
 LOGIN_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -732,19 +732,27 @@ LOGIN_TEMPLATE = """
         button { background: linear-gradient(135deg, #00e676 0%, #00c853 100%); color: #060b19; border: none; font-weight: 700; cursor: pointer; text-transform: uppercase; box-shadow: 0 4px 15px rgba(0, 230, 118, 0.2); }
         button:hover { background: linear-gradient(135deg, #00ff87 0%, #00e676 100%); }
         .error-msg { background: rgba(255, 23, 68, 0.15); color: #ff5252; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-weight: bold; font-size: 14px; border: 1px solid rgba(255, 23, 68, 0.3); }
+        .lock-msg { background: rgba(255, 152, 0, 0.15); color: #ff9800; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-weight: bold; font-size: 15px; border: 1px solid rgba(255, 152, 0, 0.3); line-height: 1.5; }
     </style>
 </head>
 <body>
     <div class="login-box">
         <h2>🔒 ImmoEcu Portal Access</h2>
-        {% if error %}
-            <div class="error-msg">{{ error }}</div>
+        
+        {% if locked %}
+            <!-- شاشة الحظر الصارمة التي تظهر بعد 15 محاولة خاطئة -->
+            <div class="lock-msg">{{ error }}</div>
+            <p style="color: #888ea8; font-size: 13px;">تم تعليق الدخول مؤقتاً لحماية المنصة السحابية.</p>
+        {% else %}
+            {% if error %}
+                <div class="error-msg">{{ error }}</div>
+            {% endif %}
+            <form method="POST" action="/login">
+                <input type="text" name="username" placeholder="اسم المستخدم / Username" required autocomplete="off">
+                <input type="password" name="password" placeholder="كلمة المرور / Password" required>
+                <button type="submit">تسجيل الدخول الآمن 🚀</button>
+            </form>
         {% endif %}
-        <form method="POST" action="/login">
-            <input type="text" name="username" placeholder="اسم المستخدم / Username" required autocomplete="off">
-            <input type="password" name="password" placeholder="كلمة المرور / Password" required>
-            <button type="submit">تسجيل الدخول الآمن 🚀</button>
-        </form>
     </div>
 </body>
 </html>
@@ -752,6 +760,18 @@ LOGIN_TEMPLATE = """
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    # تهيئة عداد المحاولات الخاطئة في الجلسة إذا لم يكن موجوداً مسبقاً
+    if "login_attempts" not in session:
+        session["login_attempts"] = 0
+
+    # التحقق الفوري: إذا بلغ المستخدم 15 محاولة خاطئة أو أكثر، يتم حظره مباشرة
+    if session["login_attempts"] >= 15:
+        return render_template_string(
+            LOGIN_TEMPLATE, 
+            error="⚠️ لقد تجاوزت الحد الأقصى للمحاولات الخاطئة (15 محاولة)! يرجى المحاولة لاحقاً.", 
+            locked=True
+        )
+
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
@@ -760,13 +780,32 @@ def login():
             user_data = USERS_DATABASE[username]
             if user_data["password"] == password:
                 if user_data["status"] == "active":
+                    # تصفير العداد فور تسجيل الدخول الناجح لضمان مرونة الحساب المستقبلي
+                    session["login_attempts"] = 0
                     session["cloud_logged_in"] = True
                     session["cloud_user"] = username
                     return redirect("/")
                 else:
-                    return render_template_string(LOGIN_TEMPLATE, error="❌ الحساب منتهي الصلاحية! يرجى تجديد الاشتراك.")
-        return render_template_string(LOGIN_TEMPLATE, error="❌ بيانات الدخول خاطئة أو غير مصرح لها!")
-    return render_template_string(LOGIN_TEMPLATE, error=None)
+                    return render_template_string(LOGIN_TEMPLATE, error="❌ الحساب منتهي الصلاحية! يرجى تجديد الاشتراك.", locked=False)
+        
+        # زيادة العداد بمقدار 1 عند كل إدخال خاطئ لبيانات الاعتماد
+        session["login_attempts"] += 1
+        remaining = 15 - session["login_attempts"]
+        
+        if session["login_attempts"] >= 15:
+            return render_template_string(
+                LOGIN_TEMPLATE, 
+                error="⚠️ لقد تجاوزت الحد الأقصى للمحاولات الخاطئة (15 محاولة)! يرجى المحاولة لاحقاً.", 
+                locked=True
+            )
+        else:
+            return render_template_string(
+                LOGIN_TEMPLATE, 
+                error=f"❌ بيانات الدخول خاطئة! متبقي لديك {remaining} محاولات قبل الحظر.", 
+                locked=False
+            )
+            
+    return render_template_string(LOGIN_TEMPLATE, error=None, locked=False)
 
 @app.route("/logout")
 def logout():
@@ -826,6 +865,5 @@ def immo_tool():
         return jsonify({"is_error": True, "code": "err_corrupted"})
 
 if __name__ == "__main__":
-    # 🏠 فتح الـ Localhost الصريح لتخطي روابط التخزين المؤقتة الخاطئة في المتصفح
     threading.Timer(1.2, lambda: webbrowser.open("http://localhost:5000/login")).start()
     app.run(host="127.0.0.1", port=5000, debug=False)
