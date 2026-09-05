@@ -6,11 +6,11 @@ app = Flask(__name__)
 # مفتاح أمان قوي لتشفير الجلسات وحماية الحسابات أونلاين
 app.secret_key = os.environ.get("SECRET_KEY", "pro_immo_ecu_secure_key_2026_secret")
 USERS_DB = {
-    "admin1": {"password": "admin1password", "role": "admin"},
-    "admin2": {"password": "admin2password", "role": "admin"},
-    "admin3": {"password": "admin3password", "role": "admin"},
-    "user1": {"password": "user1password", "role": "user"},
-    "user2": {"password": "user2password", "role": "user"}
+    "admin1": {"password": "9999", "role": "admin"},
+    "admin2": {"password": "9999", "role": "admin"},
+    "admin3": {"password": "9999", "role": "admin"},
+    "user1": {"password": "9999", "role": "user"},
+    "user2": {"password": "1111", "role": "user"}
 }
 LOGIN_TEMPLATE = r"""
 <!DOCTYPE html>
