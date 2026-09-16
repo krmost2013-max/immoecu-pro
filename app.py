@@ -120,7 +120,6 @@ IMMO_TEMPLATE += r"""
 IMMO_TEMPLATE += r"""
     <script>
         const rawDatabase = {
-            "auto_detect": {brand:"ALL", make:"ALL", name:"--- Auto-Detect ---", name_ar:"--- التعرف التلقائي الذكي ---"},
             "edc16c34_psa": {brand:"PSA", make:"Bosch", name:"Bosch EDC16C34 (EEPROM 2KB)"},
             "edc16c3": {brand:"PSA", make:"Bosch", name:"Bosch EDC16C3 (EEPROM 2KB)"},
             "me744_psa": {brand:"PSA", make:"Bosch", name:"Bosch ME7.4.4 (EEPROM 2KB)"},
@@ -136,7 +135,7 @@ IMMO_TEMPLATE += r"""
             "valeo_v4611_psa": {brand:"PSA", make:"Valeo", name:"Valeo V46.11 (EEPROM 16KB)"},
             "valeo_v34_psa": {brand:"PSA", make:"Valeo", name:"Valeo V34 (EEPROM 4KB)"},
             "valeo_j34p_psa": {brand:"PSA", make:"Valeo", name:"Valeo J34P (EEPROM 2KB)"},
-            "marelli_4mp2_psa": {brand:"PSA", make:"Marelli", name:"Magneti Marelli 4MP2 (FLASH 262KB)"},
+            "marelli_4mp2_psa": {brand:"PSA", make:"Marelli", name:"Magneti Marelli 4MP2 (FLASH 256KB)"},
             "marelli_48p2_psa": {brand:"PSA", make:"Marelli", name:"Marelli IAW 48P2 (FLASH 512KB)"},
             "dcm34_psa": {brand:"PSA", make:"Delphi", name:"Delphi DCM3.4 (EEPROM 4KB)"},
             "dcm35_psa": {brand:"PSA", make:"Delphi", name:"Delphi DCM3.5 (EEPROM 8KB)"}
@@ -184,7 +183,7 @@ IMMO_TEMPLATE += r"""
             localStorage.setItem('lang', lang); document.getElementById('html-tag').setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
             let trans = {
                 "en": {"m-title": "💻 ImmoEcu Pro v10.6", "m-sub": "🔧 Solutions", "l-lbl": "🌐 Lang:", "l-file": "📂 Select File:", "l-brand": "🚗 Select Brand:", "l-make": "⚙️ Select Maker:", "l-ecu": "🤖 Select ECU:", "l-op": "⚡ Operation:", "o-off": "IMMO OFF", "o-pin": "Read PIN", "b-sub": "Process File 🚀", "nav-main-btn": "🔒 Logout"},
-                "ar": {"m-title": "💻 إيمو إيكو برو v10.6", "m-sub": "🔧 حلول احترافية وتصحيح حقيقي", "l-lbl": "🌐 اللغة:", "l-file": "📂 اختر ملف العقل:", "l-brand": "🚗 اختر شركة السيارة:", "l-make": "⚙️ اختر صانع العقل:", "l-ecu": "🤖 نوع وحدة التحكم:", "l-op": "⚡ العملية:", "o-off": "إلغاء الحماية IMMO OFF", "o-pin": "قراءة البين كود Read PIN", "b-sub": "معالجة الملف الآن 🚀", "nav-main-btn": "🔒 تسجيل الخروج"},
+                "ar": {"m-title": "💻 ImmoEcu Pro v10.6", "m-sub": "🔧 حلول احترافية وتصحيح حقيقي", "l-lbl": "🌐 اللغة:", "l-file": "📂 اختر ملف العقل:", "l-brand": "🚗 اختر شركة السيارة:", "l-make": "⚙️ اختر صانع العقل:", "l-ecu": "🤖 نوع وحدة التحكم:", "l-op": "⚡ العملية:", "o-off": "إلغاء الحماية IMMO OFF", "o-pin": "قراءة البين كود Read PIN", "b-sub": "معالجة الملف الآن 🚀", "nav-main-btn": "🔒 تسجيل الخروج"},
                 "fr": {"m-title": "💻 ImmoEcu Pro v10.6", "m-sub": "🔧 Solutions Pro", "l-lbl": "🌐 Langue:", "l-file": "📂 Fichier:", "l-brand": "🚗 Marque:", "l-make": "⚙️ Fabricant:", "l-ecu": "🤖 Type ECU:", "l-op": "⚡ Operation:", "o-off": "IMMO OFF", "o-pin": "Lire PIN", "b-sub": "Traiter 🚀", "nav-main-btn": "🔒 Logout"}
             };
             for (let id in trans[lang]) {
@@ -256,20 +255,17 @@ def process_ecu_file(ecu_key, file_bytes, operation, original_filename="dump.bin
     base_name, file_ext = os.path.splitext(original_filename)
     filename_out = f"ImmoEcu_{base_name}_OFF{file_ext}"
 
-    # =========================================================
-    # الفحص التلقائي الذكي المبني على حجم الملف مباشرة (إجباري)
-    # =========================================================
-    
-        # 1. إذا كان حجم الملف 16KB (عقل Valeo V46.11)
-    if file_size == 16384:
+    # --- عقل Valeo V46.11 PSA (16KB) ---
+    if ecu_key == "valeo_v4611_psa":
+        if file_size != 16384: return "❌ حجم الملف غير متطابق مع إيبروم Valeo V46.11 (يجب أن يكون 16KB)!", "", True, filename_out, file_bytes, False
         if operation == "immo_off":
             file_bytes[0x08:0x0C] = b"\x11\x11\x11\x11"      # السطر الأول: خانات 08 إلى 0B
-            file_bytes[0x12:0x15] = b"\x5C\xDD\x00"          # السطر الثاني: خانات 02 إلى 04 (التعديل الثلاثي الجديد)
+            file_bytes[0x12:0x15] = b"\x5C\xDD\x00"          # السطر الثاني: خانات 02 إلى 04
             file_bytes[0x16:0x1A] = b"\x70\x07\x8F\xF8"      # السطر الثاني: خانات 06 إلى 09
             file_bytes[0x108:0x10C] = b"\x11\x11\x11\x11"    # سطر 0100: خانات 08 إلى 0B
-            file_bytes[0x112:0x115] = b"\x5C\xDD\x00"        # سطر 0110: خانات 02 إلى 04 (التعديل الثلاثي الجديد)
+            file_bytes[0x112:0x115] = b"\x5C\xDD\x00"        # سطر 0110: خانات 02 إلى 04
             file_bytes[0x116:0x11A] = b"\x70\x07\x8F\xF8"    # سطر 0110: خانات 06 إلى 09
-            return server_code, extracted_pin, is_error_css, filename_out, bytes(file_bytes), should_download
+            return "success_mod", "", False, filename_out, bytes(file_bytes), True
         elif operation == "read_pin":
             try:
                 b1, b2, b3, b4 = file_bytes[0x08], file_bytes[0x09], file_bytes[0x0A], file_bytes[0x0B]
@@ -281,77 +277,23 @@ def process_ecu_file(ecu_key, file_bytes, operation, original_filename="dump.bin
                 return "success_pin", extracted_pin, False, filename_out, bytes(file_bytes), False
             except: pass
 
-    # 2. إذا كان حجم الملف 2KB (عقول EDC16C3 / EDC16C34) وتجنب التداخل مع ME7.4.4
-    if file_size == 2048 and ecu_key != "me744_psa":
-        if operation == "immo_off":
-            file_bytes[0x60:0xB0] = (
-                b"\xFA\xBE\x86\x8A\xFF\xFF\xFB\x37\x00\x00\x00\x00\x00\x00\x00\x00"
-                b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
-                b"\xCE\xDF\x23\xBE\xAA\xC3\xFC\x01\x00\x00\x00\x00\x00\x00\x00\x00"
-                b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
-                b"\xDB\xAC\x92\x8C\x55\x3C\xFC\xC5\x00\x00\x00\x00\x00\x00\x00\x00"
-            )
-            return server_code, extracted_pin, is_error_css, filename_out, bytes(file_bytes), should_download
-    # =========================================================
-    # شروط المعالجة المستقلة لكل عقل بناءً على الهوية المحددة
-    # =========================================================
-
-    # --- عقل Bosch ME7.4.4 ---
-    if ecu_key == "me744_psa":
+    # --- عقل Bosch ME7.4.4 PSA (2KB) ---
+    elif ecu_key == "me744_psa":
         if file_size != 2048: return "❌ حجم الملف غير متطابق مع إيبروم ME7.4.4 (يجب أن يكون 2KB)!", "", True, filename_out, file_bytes, False
         if operation == "immo_off":
             file_bytes[0x0590:0x05B0] = (
                 b"\x58\x01\x11\x11\x11\x11\xEE\xEE\xEE\xEE\xFF\x00\xFF\x00\x54\xF9"
                 b"\x58\x01\x11\x11\x11\x11\xEE\xEE\xEE\xEE\xFF\x00\xFF\x00\x54\xF9"
             )
-            should_download, is_error_css, server_code = True, False, "success_mod"
+            return "success_mod", "", False, filename_out, bytes(file_bytes), True
         elif operation == "read_pin":
             try:
                 c1, c2, c3, c4 = chr(file_bytes[0x0592]), chr(file_bytes[0x0593]), chr(file_bytes[0x0594]), chr(file_bytes[0x0595])
                 extracted_pin = f"{c1}{c2}{c3}{c4}"
-                server_code, is_error_css, should_download = "success_pin", False, False
+                return "success_pin", extracted_pin, False, filename_out, bytes(file_bytes), False
             except: pass
-            return server_code, extracted_pin, is_error_css, filename_out, bytes(file_bytes), should_download
-            
-    # --- عقل Valeo J34P PSA (2KB) ---
-    elif ecu_key == "valeo_j34p_psa":
-        if file_size != 2048: return "❌ حجم الملف غير متطابق مع إيبروم Valeo J34P (يجب أن يكون 2KB)!", "", True, filename_out, file_bytes, False
-        
-        # 1. عملية إلغاء الحماية IMMO OFF
-        if operation == "immo_off":
-            # السلسلة المحددة المكونة من 20 بايت لحقنها في المواضع المطلوبة
-            j34p_patch = b"\x00\x00\x00\x00\x55\x55\x4D\x48\x00\x01\x5D\x61\x00\x00\x00\x04\xFF\xFB\x2D\x7B"
-            
-            # التعديل الأول: حقن الـ 20 بايت في أول الملف (من العنوان 0x00 إلى 0x13)
-            file_bytes[0x00:0x14] = j34p_patch
-            
-            # التعديل الثاني: حقن الـ 20 بايت ابتداءً من السطر 00000070 (من العنوان 0x70 إلى 0x83)
-            file_bytes[0x70:0x84] = j34p_patch
-            
-            should_download, is_error_css, server_code = True, False, "success_mod"
-            
-        # 2. عملية قراءة البين كود Read PIN بترتيب مخصص (3 ثم 4 ثم 2 ثم 1)
-        elif operation == "read_pin":
-            try:
-                # قراءة البايتات الأربعة من خانة 04 إلى 07 في السطر الأول
-                b1 = file_bytes[0x04]
-                b2 = file_bytes[0x05]
-                b3 = file_bytes[0x06]
-                b4 = file_bytes[0x07]
-                
-                # ترجمة الأحرف بالترتيب المخصص المطلوب (3.4.2.1) إلى ASCII
-                c3 = chr(b3) if 32 <= b3 <= 126 else str(b3 if b3 <= 9 else b3 % 10)
-                c4 = chr(b4) if 32 <= b4 <= 126 else str(b4 if b4 <= 9 else b4 % 10)
-                c2 = chr(b2) if 32 <= b2 <= 126 else str(b2 if b2 <= 9 else b2 % 10)
-                c1 = chr(b1) if 32 <= b1 <= 126 else str(b1 if b1 <= 9 else b1 % 10)
-                
-                extracted_pin = f"{c3}{c4}{c2}{c1}"
-                server_code, is_error_css, should_download = "success_pin", False, False
-            except:
-                pass
-            return server_code, extracted_pin, is_error_css, filename_out, bytes(file_bytes), should_download
 
-    # --- عقل Bosch ME7.4.5 ---
+    # --- عقل Bosch ME7.4.5 PSA (4KB) ---
     elif ecu_key == "me745_psa":
         if file_size != 4096: return "❌ حجم الملف غير متطابق مع إيبروم ME7.4.5 (يجب أن يكون 4KB)!", "", True, filename_out, file_bytes, False
         if operation == "immo_off":
@@ -359,77 +301,214 @@ def process_ecu_file(ecu_key, file_bytes, operation, original_filename="dump.bin
                 b"\x58\x01\x11\x11\x11\x11\xEE\xEE\xEE\xEE\xFF\x00\xFF\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xBB\xE9"
                 b"\x58\x01\x11\x11\x11\x11\xEE\xEE\xEE\xEE\xFF\x00\xFF\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xBB\xE9"
             )
-            should_download, is_error_css, server_code = True, False, "success_mod"
+            return "success_mod", "", False, filename_out, bytes(file_bytes), True
         elif operation == "read_pin":
             try:
                 c1, c2, c3, c4 = chr(file_bytes[0x42]), chr(file_bytes[0x43]), chr(file_bytes[0x44]), chr(file_bytes[0x45])
                 extracted_pin = f"{c1}{c2}{c3}{c4}"
-                server_code, is_error_css, should_download = "success_pin", False, False
+                return "success_pin", extracted_pin, False, filename_out, bytes(file_bytes), False
             except: pass
-            return server_code, extracted_pin, is_error_css, filename_out, bytes(file_bytes), should_download
-
     # --- عقل Continental SID807EVO ---
     elif ecu_key == "sid807evo_psa":
         if file_size != 4194304: return "❌ حجم الملف غير متطابق مع فلاش SID807EVO (يجب أن يكون 4096KB)!", "", True, filename_out, file_bytes, False
         if operation == "immo_off":
             file_bytes[0xB00:0xB09] = b"\x11\x11\x11\x11\x07\x70\xFF\xD0\xB4"
-            should_download, is_error_css, server_code = True, False, "success_mod"
+            return "success_mod", "", False, filename_out, bytes(file_bytes), True
         elif operation == "read_pin":
             try:
                 b1, b2, b3, b4 = file_bytes[0xB00], file_bytes[0xB01], file_bytes[0xB02], file_bytes[0xB03]
                 c4, c3, c2, c1 = chr(b4), chr(b3), chr(b2), chr(b1)
                 extracted_pin = f"{c4}{c3}{c2}{c1}"
-                server_code, is_error_css, should_download = "success_pin", False, False
+                return "success_pin", extracted_pin, False, filename_out, bytes(file_bytes), False
             except: pass
-            return server_code, extracted_pin, is_error_css, filename_out, bytes(file_bytes), should_download
 
-    # --- عقل Siemens SID801 / SID801A ---
-    elif ecu_key == "sid801_801a_psa" or ecu_key == "sid801_25dt_ct":
+                   # --- عقل Siemens SID801 25 DT/CT (التصحيح الشامل والمطابق للـ OFF الحقيقي) ---
+    elif ecu_key == "sid801_25dt_ct":
+        if file_size != 256: return "❌ حجم الملف غير متطابق مع إيبروم SID801 (يجب أن يكون 256 بايت)!", "", True, filename_out, file_bytes, False
+        
+        # 1. عملية إلغاء الحماية IMMO OFF الصحيحة (الحقن في السطر 00000040)
+                # 1. عملية إلغاء الحماية IMMO OFF المعتمدة والصحيحة بدون أي زحزحة للبايتات
+        if operation == "immo_off":
+            # تصفير أول 10 بايتات من السطر الأول (النطاق 0x0A يغطي 10 بايتات بالتمام والكمال لمنع الإزاحة)
+            file_bytes[0x00:0x0A] = b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+            
+            # تصفير 10 بايتات في السطر الخامس ابتداءً من الخانة 04 إلى 0D (موزونة وتتسع لـ 10 بايتات)
+            file_bytes[0x44:0x4E] = b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+            
+            return "success_mod", "", False, filename_out, bytes(file_bytes), True
+            
+        # 2. عملية قراءة البين كود الحقيقي Read PIN المقابل للأحرف الظاهرة في الهكس
+        elif operation == "read_pin":
+            try:
+                # الكود بين متواجد في نهاية النطاق المظلل بالسطر 0x40 (الخانتين 0C و 0D المقابلة للعناوين 0x4C و 0x4D)
+                b1 = file_bytes[0x4C]
+                b2 = file_bytes[0x4D]
+                
+                # ترجمة الخانتين إلى ASCII (بما أنه مكون من خانتين مقروءتين فقط في هذا الدامب)
+                c1 = chr(b1) if 32 <= b1 <= 126 else str(b1 if b1 <= 9 else b1 % 10)
+                c2 = chr(b2) if 32 <= b2 <= 126 else str(b2 if b2 <= 9 else b2 % 10)
+                
+                extracted_pin = f"{c1}{c2}"
+                return "success_pin", extracted_pin, False, filename_out, bytes(file_bytes), False
+            except:
+                pass
+
+    # --- عقل Siemens SID801 / SID801A PSA القياسي (الخوارزمية الأصلية المنفصلة) ---
+    elif ecu_key == "sid801_801a_psa":
         if file_size != 256: return "❌ حجم الملف غير متطابق مع إيبروم SID801 (يجب أن يكون 256 بايت)!", "", True, filename_out, file_bytes, False
         if operation == "immo_off":
+            # التعديل الأول: من خانة 0A في السطر الأول إلى خانة 01 في السطر الثاني (العناوين من 0x0A إلى 0x11)
             file_bytes[0x0A:0x12] = b"\xFF\xFF\xFF\xFF\xFF\xFF\x01\x8F"
+            # التعديل الثاني: من خانة 0E في سطر 00000040 إلى خانة 05 في سطر 00000050 (العناوين من 0x4E إلى 0x55)
             file_bytes[0x4E:0x56] = b"\xFF\xFF\xFF\xFF\xFF\xFF\x01\x8F"
-            should_download, is_error_css, server_code = True, False, "success_mod"
+            return "success_mod", "", False, filename_out, bytes(file_bytes), True
         elif operation == "read_pin":
             try:
                 b1, b2, b3, b4 = file_bytes[0x0A], file_bytes[0x0B], file_bytes[0x0C], file_bytes[0x0D]
                 c4, c3, c2, c1 = chr(b4), chr(b3), chr(b2), chr(b1)
                 extracted_pin = f"{c4}{c3}{c2}{c1}"
-                server_code, is_error_css, should_download = "success_pin", False, False
+                return "success_pin", extracted_pin, False, filename_out, bytes(file_bytes), False
             except: pass
-            return server_code, extracted_pin, is_error_css, filename_out, bytes(file_bytes), should_download
 
-    # --- عقل Continental Sirius 81 ---
+        # --- عقل Continental Sirius 81 ---
     elif ecu_key == "sirius81_eeprom":
         if file_size != 256: return "❌ حجم الملف غير متطابق مع إيبروم Sirius 81 (يجب أن يكون 256 بايت)!", "", True, filename_out, file_bytes, False
         if operation == "immo_off":
             file_bytes[0x0A:0x12] = b"\xFF\xFF\xFF\xFF\xFF\xFF\x01\x8F"
             file_bytes[0x48:0x50] = b"\xFF\xFF\xFF\xFF\xFF\xFF\x01\x8F"
-            should_download, is_error_css, server_code = True, False, "success_mod"
+            return "success_mod", "", False, filename_out, bytes(file_bytes), True
         elif operation == "read_pin":
             try:
                 b1, b2, b3, b4 = file_bytes[0x0A], file_bytes[0x0B], file_bytes[0x0C], file_bytes[0x0D]
                 c4, c3, c2, c1 = chr(b4), chr(b3), chr(b2), chr(b1)
                 extracted_pin = f"{c4}{c3}{c2}{c1}"
-                server_code, is_error_css, should_download = "success_pin", False, False
+                return "success_pin", extracted_pin, False, filename_out, bytes(file_bytes), False
             except: pass
-            return server_code, extracted_pin, is_error_css, filename_out, bytes(file_bytes), should_download
+
+    # --- عقل Valeo J34P ---
+    elif ecu_key == "valeo_j34p_psa":
+        if file_size != 2048: return "❌ حجم الملف غير متطابق مع إيبروم Valeo J34P (يجب أن يكون 2KB)!", "", True, filename_out, file_bytes, False
+        if operation == "immo_off":
+            j34p_patch = b"\xFE\x6C\xFE\x6C\x11\x11\x11\x11\x00\xFF\xE0\x06\xC5\xA0\x00\xFF\x39\x60\x00\x00"
+            file_bytes[0x00:0x14] = j34p_patch
+            file_bytes[0x70:0x84] = j34p_patch
+            return "success_mod", "", False, filename_out, bytes(file_bytes), True
+        elif operation == "read_pin":
+            try:
+                b1, b2, b3, b4 = file_bytes[0x04], file_bytes[0x05], file_bytes[0x06], file_bytes[0x07]
+                c3, c4, c2, c1 = chr(b3), chr(b4), chr(b2), chr(b1)
+                extracted_pin = f"{c3}{c4}{c2}{c1}"
+                return "success_pin", extracted_pin, False, filename_out, bytes(file_bytes), False
+            except: pass
+
+        # --- عقل Valeo V34 PSA (4KB) ---
+    elif ecu_key == "valeo_v34_psa":
+        if file_size != 4096: return "❌ حجم الملف غير متطابق مع إيبروم Valeo V34 (يجب أن يكون 4KB)!", "", True, filename_out, file_bytes, False
+        
+        # 1. عملية إلغاء الحماية IMMO OFF (الحقن في نهاية السطر الأول ونهاية السطر 0x70)
+        if operation == "immo_off":
+            # الشفرة المطلوبة المكونة من 4 بايت
+            v34_patch = b"\x70\x07\x8F\xF8"
+            
+            # التعديل الأول: آخر 4 بايتات في السطر الأول (الخانات 0C إلى 0F)
+            file_bytes[0x0C:0x10] = v34_patch
+            
+            # التعديل الثاني: آخر 4 بايتات في سطر 00000070 (الخانات 7C إلى 7F)
+            file_bytes[0x7C:0x80] = v34_patch
+            
+            return "success_mod", "", False, filename_out, bytes(file_bytes), True
+            
+        # 2. عملية قراءة البين كود من الخانات 04 إلى 07 بترتيب عقل J34P المخصص (3.4.2.1)
+        elif operation == "read_pin":
+            try:
+                # العناوين المقابلة للخانات 04 و 05 و 06 و 07
+                b1 = file_bytes[0x04]
+                b2 = file_bytes[0x05]
+                b3 = file_bytes[0x06]
+                b4 = file_bytes[0x07]
+                
+                # ترجمة الأحرف مع تطبيق الترتيب المخصص لـ J34P (b3 ثم b4 ثم b2 ثم b1)
+                c3 = chr(b3) if 32 <= b3 <= 126 else str(b3 if b3 <= 9 else b3 % 10)
+                c4 = chr(b4) if 32 <= b4 <= 126 else str(b4 if b4 <= 9 else b4 % 10)
+                c2 = chr(b2) if 32 <= b2 <= 126 else str(b2 if b2 <= 9 else b2 % 10)
+                c1 = chr(b1) if 32 <= b1 <= 126 else str(b1 if b1 <= 9 else b1 % 10)
+                
+                extracted_pin = f"{c3}{c4}{c2}{c1}"
+                return "success_pin", extracted_pin, False, filename_out, bytes(file_bytes), False
+            except:
+                pass
 
     # --- عقل Bosch EDC16C39 Fiat ---
     elif ecu_key == "edc16c39_fiat":
         if operation == "immo_off" and file_size >= 0x001C81AF + 1:
             file_bytes[0x001C81AE], file_bytes[0x001C81AF] = 0x00, 0x00
-        should_download, is_error_css, server_code = True, False, "success_mod"
+            return "success_mod", "", False, filename_out, bytes(file_bytes), True
 
-    # --- عقل Magneti Marelli 4MP2 ---
+        # --- عقل Magneti Marelli 4MP2 PSA (البحث الديناميكي + ترتيب PIN مخصص) ---
     elif ecu_key == "marelli_4mp2_psa":
+        target_sig = b"\x96\x48\xA5\xC3"
+        
+        # 1. عملية إلغاء الحماية IMMO OFF الديناميكية
         if operation == "immo_off":
-            target_sig = b"\x96\x48\xA5\xC3"
             marelli_patch = b"\x31\x54\x34\x38\xFF\x7E\x46\x4A\xFF\x7E\xAB\xD6"
+            # البحث عن التوقيع في الملف بالكامل خطوة بخطوة (بقفزات 16 بايت لضمان مطابقة السطور)
+            for offset in range(0, file_size - 16, 16):
+                if file_bytes[offset:offset+4] == target_sig:
+                    # تحويل الـ 12 بايت التي تلي التوقيع مباشرة دون لمس التوقيع نفسه
+                    file_bytes[offset+4:offset+16] = marelli_patch
+            return "success_mod", "", False, filename_out, bytes(file_bytes), True
+            
+        # 2. عملية قراءة البين كود الحقيقي بعكس الترتيب التناظري (المثال: AUU2 تصبح UA2U)
+        elif operation == "read_pin":
+            try:
+                for offset in range(0, file_size - 16, 16):
+                    if file_bytes[offset:offset+4] == target_sig:
+                        # جلب أول 4 بايتات تلي التوقيع مباشرة (الخانات 1 و 2 و 3 و 4 بعد التوقيع)
+                        b1 = file_bytes[offset+4]
+                        b2 = file_bytes[offset+5]
+                        b3 = file_bytes[offset+6]
+                        b4 = file_bytes[offset+7]
+                        
+                        # ترجمة البايتات إلى أحرف ASCII
+                        c1 = chr(b1) if 32 <= b1 <= 126 else str(b1 if b1 <= 9 else b1 % 10)
+                        c2 = chr(b2) if 32 <= b2 <= 126 else str(b2 if b2 <= 9 else b2 % 10)
+                        c3 = chr(b3) if 32 <= b3 <= 126 else str(b3 if b3 <= 9 else b3 % 10)
+                        c4 = chr(b4) if 32 <= b4 <= 126 else str(b4 if b4 <= 9 else b4 % 10)
+                        
+                        # تطبيق الترتيب المخصص لعكس البنية (b2 ثم b1 ثم b4固 b3) لتتحول AUU2 إلى UA2U
+                        extracted_pin = f"{c2}{c1}{c4}{c3}"
+                        return "success_pin", extracted_pin, False, filename_out, bytes(file_bytes), False
+            except:
+                pass
+
+    # --- عقل Magneti Marelli 48P2 PSA (البحث الديناميكي + التصفير الكامل مخصص) ---
+    elif ecu_key == "marelli_48p2_psa":
+        target_sig = b"\x96\x48\xA5\xC3"
+        
+        # 1. عملية إلغاء الحماية IMMO OFF الديناميكية لـ 48P2 (تصفير الـ 12 بايت التي تلي التوقيع)
+        if operation == "immo_off":
+            marelli_patch = b"\x31\x54\x34\x38\xFF\x7E\x46\x4A\xFF\x7E\xAB\xD6" 
+            
             for offset in range(0, file_size - 16, 16):
                 if file_bytes[offset:offset+4] == target_sig:
                     file_bytes[offset+4:offset+16] = marelli_patch
-        should_download, is_error_css, server_code = True, False, "success_mod"
+            return "success_mod", "", False, filename_out, bytes(file_bytes), True
+            
+        # 2. عملية قراءة البين كود بنفس خوارزمية الترتيب المعكوس لـ 4MP2
+        elif operation == "read_pin":
+            try:
+                for offset in range(0, file_size - 16, 16):
+                    if file_bytes[offset:offset+4] == target_sig:
+                        b1, b2, b3, b4 = file_bytes[offset+4], file_bytes[offset+5], file_bytes[offset+6], file_bytes[offset+7]
+                        c1 = chr(b1) if 32 <= b1 <= 126 else str(b1 if b1 <= 9 else b1 % 10)
+                        c2 = chr(b2) if 32 <= b2 <= 126 else str(b2 if b2 <= 9 else b2 % 10)
+                        c3 = chr(b3) if 32 <= b3 <= 126 else str(b3 if b3 <= 9 else b3 % 10)
+                        c4 = chr(b4) if 32 <= b4 <= 126 else str(b4 if b4 <= 9 else b4 % 10)
+                        
+                        extracted_pin = f"{c2}{c1}{c4}{c3}"
+                        return "success_pin", extracted_pin, False, filename_out, bytes(file_bytes), False
+            except:
+                pass
 
     # --- عقل Bosch EDC15C2 EEPROM ---
     elif ecu_key == "edc15c2_psa_eeprom":
@@ -438,77 +517,86 @@ def process_ecu_file(ecu_key, file_bytes, operation, original_filename="dump.bin
             file_bytes[0x200:0x204] = b"\x00\x00\x00\x00"
             file_bytes[0x216:0x21A] = b"\x00\x00\x00\x00"
             file_bytes[0x22A:0x22E] = b"\x00\x00\x00\x00"
-        should_download, is_error_css, server_code = True, False, "success_mod"
+            return "success_mod", "", False, filename_out, bytes(file_bytes), True
 
     # --- عقل Bosch EDC15C2 FLASH ---
     elif ecu_key == "edc15c2_psa_flash":
-        if operation == "immo_off" and file_size >= 0x7CCC6:
-            file_bytes[0x7CC5A:0x7CCC6] = b"\xFF" * 108
-        elif operation == "immo_virgin" and file_size >= 0x7CCC6:
-            file_bytes[0x7CC5A:0x7CCC6] = b"\x00" * 108
-        should_download, is_error_css, server_code = True, False, "success_mod"
+        if file_size >= 0x7CCC6:
+            if operation == "immo_off":
+                file_bytes[0x7CC5A:0x7CCC6] = b"\xFF" * 108
+                return "success_mod", "", False, filename_out, bytes(file_bytes), True
+            elif operation == "immo_virgin":
+                file_bytes[0x7CC5A:0x7CCC6] = b"\x00" * 108
+                return "success_mod", "", False, filename_out, bytes(file_bytes), True
 
-        # --- عقل Valeo V34 PSA (4KB) ---
-    elif ecu_key == "valeo_v34_psa":
-        if file_size != 4096: return "❌ حجم الملف غير متطابق مع إيبروم Valeo V34 (يجب أن يكون 4KB)!", "", True, filename_out, file_bytes, False
-        
-        # الفحص الإجباري: التحقق هل آخر 4 بايتات من السطر الأول معدلة مسبقاً لمنع التكرار
-        if file_bytes[0x0C:0x10] == b"\x70\x07\x8F\xF8":
-            return "❌ هذا الملف تم عمل IMMO OFF له مسبقاً في قاعدة البيانات!", "", True, filename_out, file_bytes, False
-
-        # 1. عملية إلغاء الحماية IMMO OFF
+        # --- عقل Delphi DCM3.4 PSA (الحقن في السطر 01F0 + قراءة PIN القياسية) ---
+    elif ecu_key == "dcm34_psa":
+        if file_size != 8192 and file_size != 2048:
+            # حماية لفحص الحجم إذا كان إيبروم 2KB أو 8KB حسب دقة القراءة للملف الخاص بك
+            pass
+            
+        # 1. عملية إلغاء الحماية IMMO OFF (الحقن ابتداءً من الخانة 04 في السطر 01F0)
         if operation == "immo_off":
-            # تعديل آخر 4 بايتات من السطر الأول (المواضع من 0x0C إلى 0x0F)
-            file_bytes[0x0C:0x10] = b"\x70\x07\x8F\xF8"
+            if file_size >= 0x0200:
+                # حقن الـ 12 بايت كاملة في النطاق المحدد تماماً لمنع حدوث أي زحزحة
+                file_bytes[0x01F4:0x0200] = b"\x11\x11\x11\x11\x81\x00\x00\x6C\x70\x07\x00\x78"
+                return "success_mod", "", False, filename_out, bytes(file_bytes), True
+            else:
+                return "❌ حجم الملف صغير جداً ولا يحتوي على السطر 000001F0!", "", True, filename_out, file_bytes, False
             
-            # تعديل آخر 4 بايتات من سطر 00000070 (المواضع من 0x7C إلى 0x7F)
-            file_bytes[0x7C:0x80] = b"\x70\x07\x8F\xF8"
-            
-            should_download, is_error_css, server_code = True, False, "success_mod"
-            
-        # 2. عملية قراءة البين كود Read PIN بترتيب مخصص (3 ثم 4 ثم 1 ثم 2)
+        # 2. عملية قراءة البين كود من نفس الخانات بالترتيب الطبيعي القياسي 1.2.3.4
         elif operation == "read_pin":
             try:
-                # قراءة البايتات الأربعة من خانة 04 إلى 07 في السطر الأول
-                b1 = file_bytes[0x04]
-                b2 = file_bytes[0x05]
-                b3 = file_bytes[0x06]
-                b4 = file_bytes[0x07]
+                # قراءة البايتات الأربعة ابتداءً من الخانة 04 في السطر 01F0
+                b1 = file_bytes[0x01F4]
+                b2 = file_bytes[0x01F5]
+                b3 = file_bytes[0x01F6]
+                b4 = file_bytes[0x01F7]
                 
-                # ترجمة الأحرف بالترتيب المخصص المطلوب (3.4.1.2) إلى ASCII
-                c3 = chr(b3) if 32 <= b3 <= 126 else str(b3 if b3 <= 9 else b3 % 10)
-                c4 = chr(b4) if 32 <= b4 <= 126 else str(b4 if b4 <= 9 else b4 % 10)
+                # ترجمة البايتات المستخرجة إلى أحرف ASCII المقروءة بالترتيب الطبيعي
                 c1 = chr(b1) if 32 <= b1 <= 126 else str(b1 if b1 <= 9 else b1 % 10)
                 c2 = chr(b2) if 32 <= b2 <= 126 else str(b2 if b2 <= 9 else b2 % 10)
+                c3 = chr(b3) if 32 <= b3 <= 126 else str(b3 if b3 <= 9 else b3 % 10)
+                c4 = chr(b4) if 32 <= b4 <= 126 else str(b4 if b4 <= 9 else b4 % 10)
                 
-                extracted_pin = f"{c3}{c4}{c1}{c2}"
-                server_code, is_error_css, should_download = "success_pin", False, False
+                extracted_pin = f"{c1}{c2}{c3}{c4}"
+                return "success_pin", extracted_pin, False, filename_out, bytes(file_bytes), False
             except:
                 pass
-            return server_code, extracted_pin, is_error_css, filename_out, bytes(file_bytes), should_download
 
-    # --- عقل Delphi DCM3.4 ---
-    elif ecu_key == "dcm34_psa":
-        if operation == "immo_off" and file_size >= 0x0200:
-            file_bytes[0x01F4:0x0200] = b"\x11\x11\x11\x11\x81\x00\x00\x6C\x70\x07\x00\x78"
-        should_download, is_error_css, server_code = True, False, "success_mod"
-
-    # --- عقل Delphi DCM3.5 ---
+                    # --- عقل Delphi DCM3.5 PSA (حجم 8KB - مضبوط ومطابق لبنية DCM3.4 تماماً) ---
     elif ecu_key == "dcm35_psa":
-        if operation == "immo_off" and file_size >= 0x00B0:
-            file_bytes[0x00A0:0x00B0] = b"\x0A\x40\x11\x11\x11\x11\x81\x00\x00\x6C\x70\x07\x00\x78\xB3\x8A"
-        should_download, is_error_css, server_code = True, False, "success_mod"
-
-    # القراءة الاحتياطية العامة للـ PIN في حال لم يستخرج في الأعلى
-    if operation == "read_pin" and not extracted_pin:
-        try:
-            b1, b2, b3, b4 = file_bytes[0x60], file_bytes[0x61], file_bytes[0x62], file_bytes[0x63]
-            c1, c2, c3, c4 = chr(b1), chr(b2), chr(b3), chr(b4)
-            extracted_pin = f"{c1}{c2}{c3}{c4}"
-            server_code, is_error_css, should_download = "success_pin", False, False
-        except: pass
+        if file_size != 8192: 
+            return "❌ حجم الملف غير متطابق مع إيبروم Delphi DCM3.5 (يجب أن يكون 8KB)!", "", True, filename_out, file_bytes, False
+            
+        # 1. عملية إلغاء الحماية IMMO OFF (تعديل آخر 14 بايت في السطر 00A0 دون زحزحة)
+        if operation == "immo_off":
+            # حقن الـ 14 بايت كاملة من الخانة 02 إلى نهاية السطر (العناوين من 0x00A2 إلى 0x00B0)
+            file_bytes[0x00A2:0x00B0] = b"\x11\x11\x11\x11\x81\x00\x00\x6C\x70\x07\x00\x78\xB3\x8A"
+            return "success_mod", "", False, filename_out, bytes(file_bytes), True
+            
+        # 2. عملية قراءة البين كود من الخانة 02 إلى 05 بالترتيب الطبيعي المباشر 1234
+        elif operation == "read_pin":
+            try:
+                # قراءة البايتات الأربعة المقابلة للخانات 02، 03، 04، 05 في السطر 00A0
+                b1 = file_bytes[0x00A2]
+                b2 = file_bytes[0x00A3]
+                b3 = file_bytes[0x00A4]
+                b4 = file_bytes[0x00A5]
+                
+                # ترجمة البايتات المستخرجة إلى أحرف ASCII المقروءة بالترتيب الطبيعي المباشر
+                c1 = chr(b1) if 32 <= b1 <= 126 else str(b1 if b1 <= 9 else b1 % 10)
+                c2 = chr(b2) if 32 <= b2 <= 126 else str(b2 if b2 <= 9 else b2 % 10)
+                c3 = chr(b3) if 32 <= b3 <= 126 else str(b3 if b3 <= 9 else b3 % 10)
+                c4 = chr(b4) if 32 <= b4 <= 126 else str(b4 if b4 <= 9 else b4 % 10)
+                
+                extracted_pin = f"{c1}{c2}{c3}{c4}"
+                return "success_pin", extracted_pin, False, filename_out, bytes(file_bytes), False
+            except:
+                pass
 
     return server_code, extracted_pin, is_error_css, filename_out, bytes(file_bytes), should_download
+
 @app.route("/login", methods=["GET", "POST"])
 def login_page():
     if request.method == "GET":
