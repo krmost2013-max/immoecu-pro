@@ -56,6 +56,75 @@ LOGIN_TEMPLATE += r"""
 </body>
 </html>
 """
+LANDING_TEMPLATE = r"""
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ImmoEcu Pro v10.6 | المنصة الاحترافية لهندسة برمجيات السيارات</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #060b19 0%, #0e1726 100%); color: #fff; margin: 0; padding: 0; text-align: center; }
+        .hero { padding: 80px 20px; background: rgba(27, 46, 75, 0.2); border-bottom: 1px solid rgba(0, 184, 255, 0.1); backdrop-filter: blur(8px); }
+        h1 { color: #00b8ff; font-size: 38px; font-weight: 800; text-shadow: 0 0 15px rgba(0, 184, 255, 0.4); margin-bottom: 10px; }
+        .subtitle { color: #00e676; font-size: 18px; font-weight: bold; margin-bottom: 30px; }
+        .btn-enter { display: inline-block; background: linear-gradient(135deg, #00b8ff 0%, #0077ff 100%); color: #060b19; font-weight: bold; padding: 16px 40px; border-radius: 8px; text-decoration: none; font-size: 18px; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,184,255,0.3); }
+        .btn-enter:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,184,255,0.5); }
+        .container { max-width: 900px; margin: 50px auto; padding: 0 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 30px; }
+        .card { background: rgba(27, 46, 75, 0.4); border: 1px solid rgba(0, 184, 255, 0.15); padding: 25px; border-radius: 12px; backdrop-filter: blur(10px); text-align: right; }
+        .card h3 { color: #00b8ff; margin-top: 0; font-size: 18px; border-bottom: 1px solid rgba(38, 59, 94, 0.5); padding-bottom: 10px; }
+        .card p { color: #bfc9d4; font-size: 14px; line-height: 1.6; margin-bottom: 0; }
+        .badge { background: rgba(0, 230, 118, 0.1); color: #00e676; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; float: left; }
+        footer { margin-top: 100px; padding: 20px; color: #515365; font-size: 12px; border-top: 1px solid rgba(38, 59, 94, 0.3); }
+    </style>
+</head>
+<body>
+
+    <div class="hero">
+        <h1>💻 ImmoEcu Pro v10.6</h1>
+        <div class="subtitle">🚀 المنصة الفورية الأسرع لعمل IMMO OFF وقراءة الـ PIN Code أونلاين</div>
+        <p style="color: #888ea8; max-width: 600px; margin: 0 auto 40px auto; font-size: 15px; line-height: 1.6;">
+            منصة ويب متكاملة مصممة خصيصاً لفنيي ومبرمجي عقول السيارات لإصلاح وتعديل ملفات الدامب (Dumps) بأمان تام وبدون أي زحزحة للبايتات.
+        </p>
+        <a href="/login" class="btn-enter">دخول المنصة وابدأ المعالجة الآن 🚀</a>
+    </div>
+
+    <div class="container">
+        <h2>🛠️ أنواع وحدات التحكم (ECU) المدعومة في السيرفر حالياً:</h2>
+        
+        <div class="grid">
+            <div class="card">
+                <h3>🚗 عائلة بوش (Bosch) <span class="badge">إصلاح حقيقي</span></h3>
+                <p>• <b>EDC15C2</b> (EEPROM + FLASH) <br>• <b>EDC16C34 / EDC16C3</b> (PSA)<br>• <b>EDC16C34 / EDC16C39</b> (Fiat)<br>• <b>ME7.4.4 / ME7.4.5</b> (Peugeot/Citroën)</p>
+            </div>
+            
+            <div class="card">
+                <h3>⚙️ عائلة فاليو (Valeo) <span class="badge">تعديل آمن</span></h3>
+                <p>• <b>Valeo V34</b> (EEPROM 4KB)<br>• <b>Valeo J34P</b> (EEPROM 2KB)<br>• <b>Valeo V46.11</b> (EEPROM 16KB)</p>
+            </div>
+            
+            <div class="card">
+                <h3>🤖 سيمنز وماريلي ودلفي <span class="badge">ديناميكي</span></h3>
+                <p>• <b>Siemens SID801 / SID801A / SID807EVO</b><br>• <b>Marelli 4MP2 / 48P2</b> (بالبحث عن التوقيع)<br>• <b>Delphi DCM3.4 / DCM3.5</b> (EEPROM 8KB)</p>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 40px; text-align: center; background: rgba(0, 230, 118, 0.05); border-color: rgba(0, 230, 118, 0.2);">
+            <h3 style="color: #00e676;">🎁 تجربة مجانية مفتوحة مؤقتاً لفنيي السيارات</h3>
+            <p style="color: #e0e6ed;">يمكنك استخدام المنصة وتجربتها مجاناً فوراً! اضغط على دخول المنصة واستخدم الحساب التجريبي المفتوح للجميع: <br>
+            <span style="display: inline-block; background: #060b19; padding: 8px 15px; border-radius: 6px; margin-top: 10px; font-family: monospace;">اسم المستخدم: <b>free</b> | كلمة المرور: <b>1234</b></span>
+            </p>
+        </div>
+    </div>
+
+    <footer>
+        جميع الحقوق محفوظة © ImmoEcu Pro 2026 - هندسة برمجيات عقول السيارات
+    </footer>
+
+</body>
+</html>
+"""
 IMMO_TEMPLATE = r"""
 <!DOCTYPE html>
 <html lang="en" dir="ltr" id="html-tag">
@@ -617,21 +686,43 @@ def login_page():
 def logout():
     session.clear()
     return redirect(url_for("login_page"))
-@app.route("/", methods=["GET", "POST"])
+
+# ----------------------------------------------------
+# 1. مسار الصفحة الرئيسية التعريفية (سيراها زوار جوجل والعامة)
+# ----------------------------------------------------
+@app.route("/")
+def landing_page():
+    # إذا كان المستخدم مسجلاً دخوله بالفعل، انقله مباشرة للأداة
+    if "username" in session: 
+        return redirect(url_for("immo_tool_page"))
+    # إذا كان زائراً جديداً، اعرض له الواجهة التعريفية
+    return render_template_string(LANDING_TEMPLATE)
+
+# ----------------------------------------------------
+# 2. مسار أداة التعديل والمعالجة (محمي بالكامل)
+# ----------------------------------------------------
 @app.route("/immo_tool", methods=["GET", "POST"])
 def immo_tool_page():
-    if "username" not in session: return redirect(url_for("login_page"))
-    if request.method == "GET": return render_template_string(IMMO_TEMPLATE)
+    if "username" not in session: 
+        return redirect(url_for("login_page"))
+        
+    if request.method == "GET": 
+        return render_template_string(IMMO_TEMPLATE)
+        
     if request.method == "POST":
         file = request.files.get("dump_file")
         ecu_type = request.form.get("ecu_type")
         operation = request.form.get("operation")
-        if not file or file.filename == "": return jsonify({"status": "❌ يرجى اختيار ملف الدامب أولاً!"})
+        if not file or file.filename == "": 
+            return jsonify({"status": "❌ يرجى اختيار ملف الدامب أولاً!"})
+            
         file_bytes = file.read()
         server_code, pin, is_err, out_name, mod_bytes, should_dl = process_ecu_file(ecu_type, file_bytes, operation, file.filename)
-        if should_dl and not is_err: return send_file(io.BytesIO(mod_bytes), download_name=out_name, as_attachment=True)
+        
+        if should_dl and not is_err: 
+            return send_file(io.BytesIO(mod_bytes), download_name=out_name, as_attachment=True)
         return jsonify({"status": server_code, "pin": pin})
+
 if __name__ == "__main__":
-    # قراءة متغير البيئة المحيط لاستضافة ريندر للتشغيل المباشر أونلاين
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port, debug=False)
