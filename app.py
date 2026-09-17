@@ -687,6 +687,10 @@ def logout():
     session.clear()
     return redirect(url_for("login_page"))
 
+@app.route("/google82d8bfe80e0c1a19.html")
+def google_verification():
+    return "google-site-verification: google82d8bfe80e0c1a19.html"
+
 # ----------------------------------------------------
 # 1. مسار الصفحة الرئيسية التعريفية (سيراها زوار جوجل والعامة)
 # ----------------------------------------------------
