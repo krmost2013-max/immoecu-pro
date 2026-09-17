@@ -17,7 +17,7 @@ LOGIN_TEMPLATE = r"""
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تتسجيل الدخول | ImmoEcu Pro v10.6</title>
+    <title>تتسجيل الدخول | ImmoEcu Pro v1.0</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #060b19 0%, #0e1726 100%); color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
         .login-box { background: rgba(27, 46, 75, 0.65); width: 100%; max-width: 420px; padding: 40px; border-radius: 16px; box-shadow: 0px 15px 40px rgba(0,0,0,0.6); backdrop-filter: blur(12px); border: 1px solid rgba(0, 184, 255, 0.2); box-sizing: border-box; text-align: center; }
@@ -36,7 +36,7 @@ LOGIN_TEMPLATE = r"""
 LOGIN_TEMPLATE += r"""
 <body>
     <div class="login-box">
-        <h2>💻 ImmoEcu Pro v10.6</h2>
+        <h2>💻 ImmoEcu Pro v1.0</h2>
         <p>المنصة الاحترافية لهندسة برمجيات عقول السيارات</p>
         {% if error %}
         <div class="err-msg">❌ {{ error }}</div>
@@ -62,7 +62,7 @@ LANDING_TEMPLATE = r"""
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ImmoEcu Pro v10.6 | المنصة الاحترافية لهندسة برمجيات السيارات</title>
+    <title>ImmoEcu Pro v1.0 | المنصة الاحترافية لهندسة برمجيات السيارات</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #060b19 0%, #0e1726 100%); color: #fff; margin: 0; padding: 0; text-align: center; }
         .hero { padding: 80px 20px; background: rgba(27, 46, 75, 0.2); border-bottom: 1px solid rgba(0, 184, 255, 0.1); backdrop-filter: blur(8px); }
@@ -82,7 +82,7 @@ LANDING_TEMPLATE = r"""
 <body>
 
     <div class="hero">
-        <h1>💻 ImmoEcu Pro v10.6</h1>
+        <h1>💻 ImmoEcu Pro v1.0</h1>
         <div class="subtitle">🚀 المنصة الفورية الأسرع لعمل IMMO OFF وقراءة الـ PIN Code أونلاين</div>
         <p style="color: #888ea8; max-width: 600px; margin: 0 auto 40px auto; font-size: 15px; line-height: 1.6;">
             منصة ويب متكاملة مصممة خصيصاً لفنيي ومبرمجي عقول السيارات لإصلاح وتعديل ملفات الدامب (Dumps) بأمان تام وبدون أي زحزحة للبايتات.
@@ -130,7 +130,7 @@ IMMO_TEMPLATE = r"""
 <html lang="en" dir="ltr" id="html-tag">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ImmoEcu Pro v10.6</title>
+    <title>ImmoEcu Pro v1.0</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #060b19 0%, #0e1726 100%); color: #e0e6ed; padding: 40px 20px; text-align: left; margin: 0; min-height: 100vh; }
         html[dir="rtl"] body { text-align: right; }
@@ -168,7 +168,7 @@ IMMO_TEMPLATE += r"""
                 <option value="fr">Français</option>
             </select>
         </div>
-        <h1 id="m-title">💻 ImmoEcu Pro v10.6</h1><p id="m-sub">🔧 Multi-Brand Multi-PIN Solutions</p>
+        <h1 id="m-title">💻 ImmoEcu Pro v1.0</h1><p id="m-sub">🔧 Multi-Brand Multi-PIN Solutions</p>
         <div class="user-badge">👤 الحساب الحالي: {{ session['username'] }} ({{ session['role'] }})</div>
         <div id="msg-box" style="display:none;"></div>
         <form id="ecuForm" onsubmit="submitForm(event)">
@@ -251,9 +251,9 @@ IMMO_TEMPLATE += r"""
         function chgL(lang) {
             localStorage.setItem('lang', lang); document.getElementById('html-tag').setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
             let trans = {
-                "en": {"m-title": "💻 ImmoEcu Pro v10.6", "m-sub": "🔧 Solutions", "l-lbl": "🌐 Lang:", "l-file": "📂 Select File:", "l-brand": "🚗 Select Brand:", "l-make": "⚙️ Select Maker:", "l-ecu": "🤖 Select ECU:", "l-op": "⚡ Operation:", "o-off": "IMMO OFF", "o-pin": "Read PIN", "b-sub": "Process File 🚀", "nav-main-btn": "🔒 Logout"},
-                "ar": {"m-title": "💻 ImmoEcu Pro v10.6", "m-sub": "🔧 حلول احترافية وتصحيح حقيقي", "l-lbl": "🌐 اللغة:", "l-file": "📂 اختر ملف العقل:", "l-brand": "🚗 اختر شركة السيارة:", "l-make": "⚙️ اختر صانع العقل:", "l-ecu": "🤖 نوع وحدة التحكم:", "l-op": "⚡ العملية:", "o-off": "إلغاء الحماية IMMO OFF", "o-pin": "قراءة البين كود Read PIN", "b-sub": "معالجة الملف الآن 🚀", "nav-main-btn": "🔒 تسجيل الخروج"},
-                "fr": {"m-title": "💻 ImmoEcu Pro v10.6", "m-sub": "🔧 Solutions Pro", "l-lbl": "🌐 Langue:", "l-file": "📂 Fichier:", "l-brand": "🚗 Marque:", "l-make": "⚙️ Fabricant:", "l-ecu": "🤖 Type ECU:", "l-op": "⚡ Operation:", "o-off": "IMMO OFF", "o-pin": "Lire PIN", "b-sub": "Traiter 🚀", "nav-main-btn": "🔒 Logout"}
+                "en": {"m-title": "💻 ImmoEcu Pro v1.0", "m-sub": "🔧 Solutions", "l-lbl": "🌐 Lang:", "l-file": "📂 Select File:", "l-brand": "🚗 Select Brand:", "l-make": "⚙️ Select Maker:", "l-ecu": "🤖 Select ECU:", "l-op": "⚡ Operation:", "o-off": "IMMO OFF", "o-pin": "Read PIN", "b-sub": "Process File 🚀", "nav-main-btn": "🔒 Logout"},
+                "ar": {"m-title": "💻 ImmoEcu Pro v1.0", "m-sub": "🔧 حلول احترافية وتصحيح حقيقي", "l-lbl": "🌐 اللغة:", "l-file": "📂 اختر ملف العقل:", "l-brand": "🚗 اختر شركة السيارة:", "l-make": "⚙️ اختر صانع العقل:", "l-ecu": "🤖 نوع وحدة التحكم:", "l-op": "⚡ العملية:", "o-off": "إلغاء الحماية IMMO OFF", "o-pin": "قراءة البين كود Read PIN", "b-sub": "معالجة الملف الآن 🚀", "nav-main-btn": "🔒 تسجيل الخروج"},
+                "fr": {"m-title": "💻 ImmoEcu Pro v1.0", "m-sub": "🔧 Solutions Pro", "l-lbl": "🌐 Langue:", "l-file": "📂 Fichier:", "l-brand": "🚗 Marque:", "l-make": "⚙️ Fabricant:", "l-ecu": "🤖 Type ECU:", "l-op": "⚡ Operation:", "o-off": "IMMO OFF", "o-pin": "Lire PIN", "b-sub": "Traiter 🚀", "nav-main-btn": "🔒 Logout"}
             };
             for (let id in trans[lang]) {
                 let el = document.getElementById(id); if (el) el.innerText = trans[lang][id];
