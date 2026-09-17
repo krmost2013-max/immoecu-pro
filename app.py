@@ -691,23 +691,9 @@ def logout():
 def google_verification():
     return "google-site-verification: google82d8bfe80e0c1a19.html"
 
-@app.route("/sitemap.xml")
+    @app.route("/sitemap.xml")
 def sitemap():
-    # هنا تضع روابط صفحات موقعك الأساسية
-    pages = [
-        "https://immoecu.onrender.com",
-        "https://immoecu.onrender.com/login",
-        "https://immoecu.onrender.com/immo_tool",
-        "https://immoecu.onrender.com/logout"
-    ]
-    
-        xml = '<?xml version="1.0" encoding="UTF-8"?>\n
-    xml += '<urlset xmlns="http://sitemaps.org">\n
-    for page in pages:
-        xml += f"  <url><loc>{page}</loc></url>\n
-    xml += '</urlset>'
-    
-    return xml, 200, {'Content-Type': 'application/xml'}
+    return '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://sitemaps.org"><url><loc>https://immoecu.onrender.com</loc></url><url><loc>https://immoecu.onrender.com/login</loc></url><url><loc>https://immoecu.onrender.com/immo_tool</loc></url><url><loc>https://immoecu.onrender.com/logout</loc></url></urlset>', 200, {'Content-Type': 'application/xml'}
 
 # ----------------------------------------------------
 # 1. مسار الصفحة الرئيسية التعريفية (سيراها زوار جوجل والعامة)
