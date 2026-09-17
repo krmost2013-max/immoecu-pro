@@ -691,10 +691,6 @@ def logout():
 def google_verification():
     return "google-site-verification: google82d8bfe80e0c1a19.html"
 
-    @app.route("/sitemap.xml")
-def sitemap():
-    return '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://sitemaps.org"><url><loc>https://immoecu.onrender.com</loc></url><url><loc>https://immoecu.onrender.com/login</loc></url><url><loc>https://immoecu.onrender.com/immo_tool</loc></url><url><loc>https://immoecu.onrender.com/logout</loc></url></urlset>', 200, {'Content-Type': 'application/xml'}
-
 # ----------------------------------------------------
 # 1. مسار الصفحة الرئيسية التعريفية (سيراها زوار جوجل والعامة)
 # ----------------------------------------------------
